@@ -150,6 +150,18 @@ def vc_single(
         file_big_npy = (
             file_big_npy.strip(" ").strip('"').strip("\n").strip('"').strip(" ")
         )
+        info = f'''hubert_model, {hubert_model}, 
+            net_g, f{net_g},
+            sid, f{sid},
+            audio, f{audio},
+            times, f{times},
+            f0_up_key, f{f0_up_key},
+            f0_method, f{f0_method},
+            file_index, f{file_index},
+            file_big_npy, f{file_big_npy},
+            index_rate, f{index_rate},
+            if_f0, f{if_f0},
+            f0_file, f{f0_file},'''
         audio_opt = vc.pipeline(
             hubert_model,
             net_g,
@@ -164,6 +176,7 @@ def vc_single(
             if_f0,
             f0_file=f0_file,
         )
+        write('audio_opt', 48000, audio_opt)
         print(
             "npy: ", times[0], "s, f0: ", times[1], "s, infer: ", times[2], "s", sep=""
         )
@@ -286,8 +299,10 @@ def get_vc(sid):
             if_f0 = cpt.get("f0", 1)
             if if_f0 == 1:
                 net_g = SynthesizerTrnMs256NSFsid(*cpt["config"], is_half=is_half)
+                print('aaaaa', SynthesizerTrnMs256NSFsid, cpt["config"])
             else:
                 net_g = SynthesizerTrnMs256NSFsid_nono(*cpt["config"])
+                print('aaaaa', SynthesizerTrnMs256NSFsid_nono, cpt["config"])
             del net_g, cpt
             if torch.cuda.is_available():
                 torch.cuda.empty_cache()
@@ -301,15 +316,19 @@ def get_vc(sid):
     if_f0 = cpt.get("f0", 1)
     if if_f0 == 1:
         net_g = SynthesizerTrnMs256NSFsid(*cpt["config"], is_half=is_half)
+        print('bbbbb', SynthesizerTrnMs256NSFsid, cpt["config"])
     else:
         net_g = SynthesizerTrnMs256NSFsid_nono(*cpt["config"])
+        print('bbbbb', SynthesizerTrnMs256NSFsid_nono, cpt["config"])
     del net_g.enc_q
     print(net_g.load_state_dict(cpt["weight"], strict=False))  # 不加这一行清不干净, 真奇葩
     net_g.eval().to(device)
     if is_half:
         net_g = net_g.half()
+        print('bbbbb', 'net_g.half')
     else:
         net_g = net_g.float()
+        print('bbbbb', 'net_g.float')
     vc = VC(tgt_sr, device, is_half)
     n_spk = cpt["config"][-3]
     return {"visible": True, "maximum": n_spk, "__type__": "update"}
