@@ -176,6 +176,7 @@ def vc_single(
             if_f0,
             f0_file=f0_file,
         )
+        from scipy.io.wavfile import write
         write('audio_opt', 48000, audio_opt)
         print(
             "npy: ", times[0], "s, f0: ", times[1], "s, infer: ", times[2], "s", sep=""
